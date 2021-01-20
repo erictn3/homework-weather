@@ -1,0 +1,35 @@
+.card-size {
+  margin: 10px;
+  padding: 10px;
+  display: inline-block;
+  font-weight: bold;
+  border-radius: 10%;
+}
+
+.card-clear {
+  background-color: rgb(253, 251, 120);
+
+}
+
+.card-sc {
+  background-color: rgb(78, 74, 74);
+
+}
+
+.card-rain {
+  background-color: rgb(128, 128, 230);
+
+}
+
+.card-snow {
+  background-color: rgb(109, 109, 148);
+
+}
+
+.card-default {
+  background-color: honeydew;
+}
+
+.button {
+  margin: 3.5px;
+}

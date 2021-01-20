@@ -13,16 +13,18 @@ $(document).ready(function() {
     var city = $("#city").val();
     // excludes empty and repeated values 
     if (city != ""){
-      // if (city != "" && !cities.includes(city)){
       // clear search box
       $("#city").val("");
-      cities.push(city);
-      // storage saves key value pairs of array as a string 
-      localStorage.setItem("cities", JSON.stringify(cities));
-      // TODO: add new cityname to ul
-      // made a new element (li) and appended city to history ul
-      var cityName = $("<li>").text(city);
-      $(".history").prepend(cityName);
+      // check if new search is in city list, if not, push city
+      if (!cities.includes(city)){
+        cities.push(city);
+        // storage saves key value pairs of array as a string 
+        localStorage.setItem("cities", JSON.stringify(cities));
+        // made a new element (li) and appended city to history ul
+        var cityName = $("<li>").text(city);
+        $(".history").prepend(cityName); 
+      }
+      // Display city
       getCurrentDate(city);   
       getForecast(city);
     }
@@ -31,9 +33,16 @@ $(document).ready(function() {
     }
   });
 
+  $("#delete-button").on("click", function() {
+    localStorage.clear();
+    $(".history").empty();
+    cities = [];
+  });
+
   function getCurrentDate(city){
     // create var for URL
     var queryURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=f0e59b5f6d1f779e08e9cf5cfcf9307c&units=metric"
+
     // call information using AJAX
     $.ajax({
       type: "GET",
@@ -62,44 +71,74 @@ $(document).ready(function() {
         var humidity = data.main.humidity;
         var pHumid = $("<h4>").text("Humidity: " + humidity + "%");
         currentDayContainer.append(pHumid);
-        $("#today").prepend(currentDayContainer);
+
 
         var windSpeed = data.wind.speed;
         var pwindSpeed = $("<h4>").text("Wind Speed: " + windSpeed + "KPH");
-
-        currentDayContainer.append(pwindSpeed);
+        currentDayContainer.append(pwindSpeed);        
+        
+        // clearing the previous display
+        $("#today").empty();
+        $("#today").prepend(currentDayContainer);
       }
     });
   }
 
+  // gets the forecast of 5 days 
   function getForecast(city){
-    var queryURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=f0e59b5f6d1f779e08e9cf5cfcf9307c&units=metric"
+    var queryURL = "http://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=f0e59b5f6d1f779e08e9cf5cfcf9307c&units=metric"
     // call information using AJAX
     $.ajax({
       type: "GET",
       url: queryURL,
       success: function(data){
         console.log(data);
-        var currentDate = new Date();
         var outerDivForecast = $("<div>");
+        $("#forecast").empty();
         $("#forecast").prepend(outerDivForecast);   
 
         // For loop number through 5 day forecast
-        var numberOfDays = 5;
-        for (var i = 1; i <= numberOfDays; i++){
-          var nextDay = new Date();
-          nextDay.setDate(currentDate.getDate() + i);
+        for (var i = 3; i < data.list.length; i+=8){
+
+          var forecastCard = $("<div>");
+          forecastCard.addClass("card-size");
+
+          var p = $("<p>").text(data.list[i].dt_txt);
+          forecastCard.append(p);
+          outerDivForecast.append(forecastCard);
+
+          var imgURL = "http://openweathermap.org/img/w/" + data.list[i].weather[0].icon + ".png"
+          var imgIcon = $("<img>").attr("src", imgURL);
+          forecastCard.append(imgIcon);
+
+          if (data.list[i].weather[0].icon == "01d"){
+            forecastCard.addClass("card-clear");
+          }
+          else if (data.list[i].weather[0].icon == "03d"){
+            forecastCard.addClass("card-sc");
+          }
+          else if (data.list[i].weather[0].icon == "10d"){
+            forecastCard.addClass("card-rain");
+          }
+          else if (data.list[i].weather[0].icon == "13d"){
+            forecastCard.addClass("card-snow");
+          }
+          else {
+            forecastCard.addClass("card-default");
+          }
           
-          // TODO: append to 5 day forecast outer div
+          var temperature = data.list[i].main.temp;
+          var pTemp = $("<p>").text("Temperature: " + temperature + "°C");
+          forecastCard.append(pTemp);
+  
+          var humidity = data.list[i].main.humidity;
+          var pHumid = $("<p>").text("Humidity: " + humidity + "%");
+          forecastCard.append(pHumid);
         }
 
       }
     });
   }
-
-
-
-
 });
 
 
